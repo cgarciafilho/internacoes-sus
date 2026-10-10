@@ -208,7 +208,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
 <section id="territorio">
   <h2>Comparação entre UFs de residência</h2>
   <ul class="obs" data-obs="territorio"></ul>
-  <div class="fig"><div class="t">Taxa de internação por UF de residência, 2024–25</div><div class="u">por 1.000 habitantes · média anual · marca vazia = 2008–09 · barra laranja = local selecionado</div><div class="chart" id="c-uf"></div></div>
+  <div class="fig"><div class="t">Taxa de internação por UF de residência, 2024–25</div><div class="u">por 1.000 habitantes · média anual · números à direita = 2024–25 · marca vazia = 2008–09 (valor ao passar o mouse) · barra laranja = local selecionado</div><div class="chart" id="c-uf"></div></div>
   <details><summary>Tabela por UF</summary><div class="tbl" id="t-uf"></div></details>
 </section>
 
@@ -309,7 +309,7 @@ function line(id, o) {
 /* horizontal bars with optional comparison marker */
 function bars(id, rows, o = {}) {
   const el = document.getElementById(id); el.innerHTML = "";
-  const W = el.clientWidth || 600, rh = 20, gap = 4, m = { t: 6, r: 48, b: 22, l: o.ml || 40 }, H = m.t + m.b + rows.length * (rh + gap);
+  const W = el.clientWidth || 600, rh = 20, gap = 4, m = { t: 6, r: 56, b: 22, l: o.ml || 40 }, H = m.t + m.b + rows.length * (rh + gap);
   const svg = S("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": o.aria || "" }, el);
   const hi = Math.max(...rows.map(r => Math.max(r.v, r.v0 || 0))), ticks = niceTicks(0, hi, 4), top = Math.max(hi, ticks.at(-1));
   const X = v => m.l + (W - m.l - m.r) * v / top;
@@ -321,7 +321,8 @@ function bars(id, rows, o = {}) {
     const p = `M${m.l} ${y}h${w - 4}a4 4 0 0 1 4 4v${rh - 8}a4 4 0 0 1 -4 4h${-(w - 4)}z`;
     const bar = S("path", { d: p, fill: css(r.color || "--s1") }, svg);
     if (r.v0 != null) S("circle", { cx: X(r.v0), cy: y + rh / 2, r: 4, fill: css("--surface"), stroke: css("--ink-2"), "stroke-width": 1.5 }, svg);
-    S("text", { x: X(r.v) + (r.v0 != null && X(r.v0) > X(r.v) ? X(r.v0) - X(r.v) + 8 : 6), y: y + rh / 2 + 4, class: "lbl" }, svg).textContent = NF(r.v, 1);
+    // values in a column right of the plot, so no marker ever sits next to (or over) a number
+    S("text", { x: W - 4, y: y + rh / 2 + 4, "text-anchor": "end", class: "lbl" }, svg).textContent = NF(r.v, 1);
     const hit = S("rect", { x: 0, y: y - gap / 2, width: W, height: rh + gap, fill: "transparent" }, svg);
     hit.addEventListener("pointermove", ev => { bar.setAttribute("opacity", .8); showTip(o.tip(r), ev) });
     hit.addEventListener("pointerleave", () => { bar.setAttribute("opacity", 1); hideTip() });
