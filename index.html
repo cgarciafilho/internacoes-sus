@@ -51,9 +51,12 @@ h1 .geo { color: var(--s1) }
 .place select { font: 500 14px var(--f-body); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; min-width: 190px }
 .place select:focus-visible { outline: 2px solid var(--s1); outline-offset: 1px }
 nav.idx { overflow-x: auto; flex: 1 1 300px; min-width: 0 }
-nav.idx ul { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; white-space: nowrap }
-nav.idx a { display: block; padding: 4px 9px; border-radius: 4px; color: var(--ink-2); text-decoration: none; font-size: 13px }
-nav.idx a:hover, nav.idx a:focus-visible { background: var(--surface); color: var(--ink); outline: 1px solid var(--rule) }
+nav.idx { display: flex; gap: 2px; white-space: nowrap; scrollbar-width: thin }
+@media (min-width: 700px) { nav.idx { flex-basis: 100%; flex-wrap: wrap; overflow-x: visible } }  /* all tabs in view on a computer; a phone scrolls the row */
+nav.idx button { font: 13px var(--f-body); padding: 5px 9px 4px; border: 0; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; background: none; color: var(--ink-2); cursor: pointer }
+nav.idx button:hover, nav.idx button:focus-visible { background: var(--surface); color: var(--ink); outline: 1px solid var(--rule) }
+nav.idx button[aria-selected="true"] { color: var(--s1); border-bottom-color: var(--s1); font-weight: 600 }
+section[hidden] { display: none }
 section { padding-block: 36px 8px; border-bottom: 1px solid var(--rule-2); display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; scroll-margin-top: 64px }
 h2 { font: 600 24px/1.2 var(--f-display); margin: 0; text-wrap: balance }
 h3 { font: 600 15px/1.3 var(--f-body); margin: 0 }
@@ -106,7 +109,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
 .zero { stroke: var(--ink-2) }
 .kpinote { font-size: 12px; color: var(--muted); margin: 6px 0 0 }
 .foot { padding-block: 24px 0; font-size: 12px; color: var(--muted) }
-@media (prefers-reduced-motion: no-preference) { nav.idx a { transition: background .15s } }
+@media (prefers-reduced-motion: no-preference) { nav.idx button { transition: background .15s } }
 </style>
 
 </head>
@@ -119,18 +122,14 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   <div class="meta-row"><span>Fonte: DATASUS, arquivos RD (FTP), conferidos com o TabNet</span><span>Recorte por UF de residência</span><span>População: POPSVS/MS</span><span>Valores em R$ de 2025 (IPCA)</span></div>
 </header>
 
+<section id="resumo" aria-label="Resumo" class="resumo"><div class="kpis" id="kpis"></div><p class="kpinote" id="kpinote" hidden>* 2008 inclui as AIH de longa permanência de internações reabertas em janeiro de 2008, quando entrou a tabela do SIGTAP, pagas nos anos seguintes (ver Desfechos).</p></section>
+
 <div class="bar">
   <label class="place" for="geo">Local <select id="geo"></select></label>
-  <nav class="idx" aria-label="Seções"><ul>
-    <li><a href="#volume">Volume e taxa</a></li><li><a href="#mensal">Série mensal</a></li><li><a href="#queda">Queda de 2020</a></li><li><a href="#perfil">Idade e sexo</a></li>
-    <li><a href="#causas">Causas</a></li><li><a href="#desfechos">Desfechos</a></li><li><a href="#assistencia">Caráter</a></li>
-    <li><a href="#valores">Valores</a></li><li><a href="#territorio">UFs</a></li><li><a href="#qualidade">Qualidade</a></li><li><a href="#metodo">Método</a></li>
-  </ul></nav>
+  <nav class="idx" role="tablist" aria-label="Seções"><button type="button" role="tab" id="t-volume" data-tab="volume" aria-controls="volume" aria-selected="true">Volume e taxa</button><button type="button" role="tab" id="t-mensal" data-tab="mensal" aria-controls="mensal" aria-selected="false" tabindex="-1">Série mensal</button><button type="button" role="tab" id="t-queda" data-tab="queda" aria-controls="queda" aria-selected="false" tabindex="-1">Queda de 2020</button><button type="button" role="tab" id="t-perfil" data-tab="perfil" aria-controls="perfil" aria-selected="false" tabindex="-1">Idade e sexo</button><button type="button" role="tab" id="t-causas" data-tab="causas" aria-controls="causas" aria-selected="false" tabindex="-1">Causas</button><button type="button" role="tab" id="t-desfechos" data-tab="desfechos" aria-controls="desfechos" aria-selected="false" tabindex="-1">Desfechos</button><button type="button" role="tab" id="t-assistencia" data-tab="assistencia" aria-controls="assistencia" aria-selected="false" tabindex="-1">Caráter</button><button type="button" role="tab" id="t-valores" data-tab="valores" aria-controls="valores" aria-selected="false" tabindex="-1">Valores</button><button type="button" role="tab" id="t-territorio" data-tab="territorio" aria-controls="territorio" aria-selected="false" tabindex="-1">UFs</button><button type="button" role="tab" id="t-qualidade" data-tab="qualidade" aria-controls="qualidade" aria-selected="false" tabindex="-1">Qualidade</button><button type="button" role="tab" id="t-metodo" data-tab="metodo" aria-controls="metodo" aria-selected="false" tabindex="-1">Método</button></nav>
 </div>
 
-<section id="resumo" aria-label="Resumo"><div class="kpis" id="kpis"></div><p class="kpinote" id="kpinote" hidden>* 2008 inclui as AIH de longa permanência de internações reabertas em janeiro de 2008, quando entrou a tabela do SIGTAP, pagas nos anos seguintes (ver Desfechos).</p></section>
-
-<section id="volume">
+<section id="volume" role="tabpanel" aria-labelledby="t-volume">
   <h2>Volume e taxa de internação</h2>
   <ul class="obs" data-obs="volume"></ul>
   <div class="grid2">
@@ -141,14 +140,14 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   <details><summary>Tabela anual</summary><div class="tbl" id="t-anual"></div></details>
 </section>
 
-<section id="mensal">
+<section id="mensal" role="tabpanel" aria-labelledby="t-mensal" hidden>
   <h2>Série mensal e COVID-19</h2>
   <ul class="obs" data-obs="mensal"></ul>
   <div class="fig"><div class="t">Internações por mês de internação</div><div class="u" id="u-mensal">milhares</div><div class="legend" id="l-mensal"></div><div class="chart" id="c-mensal"></div>
     <div class="n">Mês da data de internação. A base inclui as AIH processadas até jul/2026, de modo que 2025 está completo.</div></div>
 </section>
 
-<section id="queda">
+<section id="queda" role="tabpanel" aria-labelledby="t-queda" hidden>
   <h2>A queda de 2020</h2>
   <ul class="obs" data-obs="queda"></ul>
   <div class="fig"><div class="t">Eletivas e urgências por mês de internação, 2018–2023</div><div class="u">índice: média mensal de 2019 = 100</div><div class="legend" id="l-eu"></div><div class="chart" id="c-eu"></div>
@@ -157,7 +156,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   <details><summary>Tabela da decomposição</summary><div class="tbl" id="t-dec"></div></details>
 </section>
 
-<section id="perfil">
+<section id="perfil" role="tabpanel" aria-labelledby="t-perfil" hidden>
   <h2>Idade e sexo</h2>
   <ul class="obs" data-obs="perfil"></ul>
   <div class="fig"><div class="t">Taxa de internação por faixa etária</div><div class="u">por 1.000 habitantes da faixa · cores por oitavos da distribuição do local</div><div class="chart" id="c-heat"></div><div class="legend" id="l-heat"></div></div>
@@ -167,7 +166,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   </div>
 </section>
 
-<section id="causas">
+<section id="causas" role="tabpanel" aria-labelledby="t-causas" hidden>
   <h2>Causas: capítulos e diagnósticos</h2>
   <ul class="obs" data-obs="causas"></ul>
   <div class="fig"><div class="t">Taxa por capítulo da CID-10, 2008–2025</div><div class="u">por 10.000 habitantes · escalas próprias em cada painel · capítulos com menos de 1 por 10 mil só na tabela</div><div class="grid3" id="c-caps"></div></div>
@@ -176,7 +175,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   <h3>15 diagnósticos com mais óbitos hospitalares em 2024–25</h3><div class="tbl" id="t-cidob"></div>
 </section>
 
-<section id="desfechos">
+<section id="desfechos" role="tabpanel" aria-labelledby="t-desfechos" hidden>
   <h2>Desfechos: óbito, permanência e UTI</h2>
   <ul class="obs" data-obs="desfechos"></ul>
   <div class="legend" id="l-desf"></div>
@@ -188,7 +187,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   <div class="fig"><div class="t">Mortalidade hospitalar por faixa etária</div><div class="u">% · 2008 e 2025</div><div class="legend" id="l-mfx"></div><div class="chart" id="c-mfx"></div></div>
 </section>
 
-<section id="assistencia">
+<section id="assistencia" role="tabpanel" aria-labelledby="t-assistencia" hidden>
   <h2>Caráter, especialidade e complexidade</h2>
   <ul class="obs" data-obs="assistencia"></ul>
   <div class="grid2">
@@ -197,7 +196,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   </div>
 </section>
 
-<section id="valores">
+<section id="valores" role="tabpanel" aria-labelledby="t-valores" hidden>
   <h2>Valores pagos</h2>
   <ul class="obs" data-obs="valores"></ul>
   <div class="grid2">
@@ -206,14 +205,14 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   </div>
 </section>
 
-<section id="territorio">
+<section id="territorio" role="tabpanel" aria-labelledby="t-territorio" hidden>
   <h2>Comparação entre UFs de residência</h2>
   <ul class="obs" data-obs="territorio"></ul>
   <div class="fig"><div class="t">Taxa de internação por UF de residência, 2024–25</div><div class="u">por 1.000 habitantes · média anual · números à direita = 2024–25 · marca vazia = 2008–09 (valor ao passar o mouse) · barra laranja = local selecionado</div><div class="chart" id="c-uf"></div></div>
   <details><summary>Tabela por UF</summary><div class="tbl" id="t-uf"></div></details>
 </section>
 
-<section id="qualidade">
+<section id="qualidade" role="tabpanel" aria-labelledby="t-qualidade" hidden>
   <h2>Qualidade do dado</h2>
   <ul class="obs" data-obs="qualidade"></ul>
   <div class="grid2">
@@ -222,7 +221,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
   </div>
 </section>
 
-<section id="metodo">
+<section id="metodo" role="tabpanel" aria-labelledby="t-metodo" hidden>
   <h2>Método e limitações</h2>
   <dl class="notes">
     <dt>Fonte</dt><dd>Arquivos RD do SIH/SUS (FTP do DATASUS, <code>SIHSUS/200801_/Dados</code>), 6.019 arquivos processados de jan/2008 a jul/2026 (Acre e Roraima de jul/2026 ainda não estavam no FTP), baixados em 09–11/10/2026. A página foi conferida com o TabNet por ano de atendimento (UF de residência, todos os arquivos de jan/2008 a jul/2026): internações, AIH, óbitos, valor e dias são iguais em todas as UFs de 2008 a 2020, exceto 2009, em que a base tem 4.540 AIH a mais (Acre, set/2009, arquivo que falta no TabNet). De 2021 a 2025 a página tem até 0,01% a mais: são sobretudo AIH com diagnóstico N18.2 a N18.5 (doença renal crônica por estágio), códigos que o TabNet não reconhece e deixa fora das tabulações (358 em 2024 e 572 em 2025).</dd>
@@ -238,7 +237,7 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
     <dt>Reprodução</dt><dd>Os scripts que baixam os dados, calculam os agregados e conferem a página com o TabNet ficam no projeto de origem, que não está publicado.</dd>
   </dl>
 </section>
-<footer class="foot">Versão preliminar, sem caráter oficial. Dados públicos do SIH/SUS (DATASUS) e da POPSVS (Ministério da Saúde). Atualizado em 11/10/2026. Erros, dúvidas e sugestões: cgarciafilho@gmail.com.</footer>
+<footer class="foot">Versão preliminar, sem caráter oficial. Dados públicos do SIH/SUS (DATASUS) e da POPSVS (Ministério da Saúde). Atualizado em 12/10/2026. Erros, dúvidas e sugestões: cgarciafilho@gmail.com.</footer>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -512,7 +511,22 @@ function render() {
     .map(([k, n, c]) => ({ name: n, values: A.map(a => a.raca[k]), color: c }));
   legend("l-raca", rc); line("c-raca", { x: Y, series: rc, yf: v => NF(v, 0), tf: v => NF(v, 1) + "%" });
 }
-render();
+const TABS = [...document.querySelectorAll('nav.idx [role="tab"]')], BAR = document.querySelector(".bar");
+function show(w, focus) {
+  if (!TABS.some(t => t.dataset.tab === w)) w = TABS[0].dataset.tab;
+  TABS.forEach(t => { const on = t.dataset.tab === w; t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1; if (on) { t.scrollIntoView({ block: "nearest", inline: "nearest" }); if (focus) t.focus() } });
+  document.querySelectorAll('[role="tabpanel"]').forEach(p => p.hidden = p.id !== w);
+  render();
+  // a tab opened from far down a long panel starts at its top, just under the bar
+  const top = BAR.previousElementSibling.getBoundingClientRect().bottom + scrollY;
+  if (scrollY > top) scrollTo(0, top);
+}
+TABS.forEach((t, i) => {
+  t.addEventListener("click", () => { show(t.dataset.tab); try { history.replaceState(null, "", "#" + t.dataset.tab) } catch (e) {} });
+  t.addEventListener("keydown", e => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return; e.preventDefault(); const n = TABS[(i + d + TABS.length) % TABS.length]; show(n.dataset.tab, true); try { history.replaceState(null, "", "#" + n.dataset.tab) } catch (e) {} });
+});
+addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 150) });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
 new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
