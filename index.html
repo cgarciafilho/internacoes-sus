@@ -110,13 +110,21 @@ code { font: 12.5px var(--f-mono); background: var(--rule-2); padding: 1px 4px; 
 .kpinote { font-size: 12px; color: var(--muted); margin: 6px 0 0 }
 .foot { padding-block: 24px 0; font-size: 12px; color: var(--muted) }
 @media (prefers-reduced-motion: no-preference) { nav.idx button { transition: background .15s } }
+.toprow { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap }
+.tema { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted) }
+.tema .seg-b { display: flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: var(--surface) }
+.tema button { font: 12px var(--f-body); padding: 4px 10px; border: 0; background: none; color: var(--ink-2); cursor: pointer }
+.tema button + button { border-left: 1px solid var(--rule) }
+.tema button:hover, .tema button:focus-visible { background: var(--band); color: var(--ink) }
+.tema button[aria-pressed="true"] { background: var(--s1); color: #fff }
 </style>
+<script>(function(){var t='dark';try{t=localStorage.getItem('sih-tema')||'dark'}catch(e){}if(t!=='light'&&t!=='dark'&&t!=='auto')t='dark';var r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);r.setAttribute('data-tema',t)})();</script>
 
 </head>
 <body>
 <div class="wrap">
 <header class="top">
-  <div class="eyebrow">SIH/SUS · AIH reduzida (RD) · 2008–2025</div>
+  <div class="toprow"><div class="eyebrow">SIH/SUS · AIH reduzida (RD) · 2008–2025</div><div class="tema" role="group" aria-label="Tema da página"><span>Tema</span><div class="seg-b"><button type="button" data-v="light" aria-pressed="false">Claro</button><button type="button" data-v="dark" aria-pressed="false">Escuro</button><button type="button" data-v="auto" aria-pressed="false" title="Segue o tema do sistema ou do navegador">Automático</button></div></div></div>
   <h1>Internações no SUS, 2008–2025 · <span class="geo" id="geo-nome">Brasil</span></h1>
   <p class="lede" id="lede"></p>
   <div class="meta-row"><span>Fonte: DATASUS, arquivos RD (FTP), conferidos com o TabNet</span><span>Recorte por UF de residência</span><span>População: POPSVS/MS</span><span>Valores em R$ de 2025 (IPCA)</span></div>
@@ -529,6 +537,18 @@ addEventListener("hashchange", () => show(location.hash.slice(1)));
 show(location.hash.slice(1));
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 150) });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+// theme: dark by default (as in the anomalies dashboard); the choice is kept in this browser only (the page works without it)
+function tema(t, save) {
+  const r = document.documentElement; if (t !== "dark" && t !== "auto") t = "light";
+  if (t === "auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme", t); r.setAttribute("data-tema", t);
+  document.querySelectorAll(".tema button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === t ? "true" : "false"));
+  if (save) { try { localStorage.setItem("sih-tema", t) } catch (e) {} }
+}
+tema(document.documentElement.getAttribute("data-tema") || "dark", false);
+document.querySelectorAll(".tema button").forEach(b => b.addEventListener("click", () => tema(b.dataset.v, true)));
+// a host page (the artifact viewer) may stamp its own theme on the root after loading: the reader's choice here wins
+new MutationObserver(() => { const r = document.documentElement, t = r.getAttribute("data-tema") || "dark"; if (t !== "auto" && r.getAttribute("data-theme") !== t) r.setAttribute("data-theme", t) })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 </script>
 
