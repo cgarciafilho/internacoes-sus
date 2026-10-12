@@ -19,7 +19,7 @@ limitações estão na seção "Método e limitações" da página.
 
 ## Fontes
 
-- SIH/SUS: arquivos RD (AIH reduzida) do FTP do DATASUS, 2008–2025, baixados em 09–10/10/2026. Não há identificação de pessoas.
+- SIH/SUS: arquivos RD (AIH reduzida) do FTP do DATASUS, processados de jan/2008 a jul/2026, baixados em 09–11/10/2026. As séries são por data de internação, 2008–2025. Não há identificação de pessoas.
 - População: POPSVS (Ministério da Saúde), estimativas por município, sexo e idade, 2000–2025.
 - IPCA: IBGE (SIDRA, tabela 1737), para os valores em reais de 2025.
 - Nomes da CID-10: tabela do DATASUS (versão 2008). Nomes dos subgrupos de procedimento: SIGTAP, conforme o TabNet.
