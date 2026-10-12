@@ -4,7 +4,7 @@ Página interativa com a análise descritiva exploratória das internações hos
 Brasil e cada UF de residência, 2008–2025: volume e taxas, série mensal e COVID-19, a queda de 2020 (eletivas e
 urgências), idade e sexo, causas (CID-10), óbito, permanência e UTI, caráter e complexidade, valores pagos, comparação
 entre UFs e qualidade do dado. É uma página única (`index.html`): os dados agregados estão embutidos nela e o filtro
-por UF funciona no navegador, sem servidor.
+por UF funciona no navegador, sem servidor. Página publicada: https://cgarciafilho.github.io/internacoes-sus/
 
 ## Aviso
 
