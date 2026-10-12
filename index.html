@@ -275,8 +275,8 @@ function line(id, o) {
   const W = el.clientWidth || 480, H = o.h || 220, m = { t: 12, r: o.endLabels ? 96 : 16, b: 26, l: o.ml || 48 };
   const svg = S("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": o.aria || "" }, el);
   const n = o.x.length, all = o.series.flatMap(s => s.values).filter(v => v != null);
-  let lo = o.zero === false ? Math.min(...all) : Math.min(0, ...all), hi = Math.max(...all);
-  if (o.zero === false) { const p = (hi - lo) * .12 || 1; lo -= p; hi += p }
+  // convention: the y axis always includes zero (no truncated axes)
+  let lo = Math.min(0, ...all), hi = Math.max(0, ...all);
   const ticks = niceTicks(lo, hi, o.ticks || 4); lo = Math.min(lo, ticks[0]); hi = Math.max(hi, ticks.at(-1));
   const X = i => m.l + (W - m.l - m.r) * (n === 1 ? .5 : i / (n - 1)), Y = v => m.t + (H - m.t - m.b) * (1 - (v - lo) / (hi - lo));
   const g = S("g", { class: "grid" }, svg), ax = S("g", { class: "ax" }, svg);
@@ -419,7 +419,7 @@ function render() {
   document.getElementById("u-intern").textContent = (big ? "milhões" : "milhares") + " · ano de internação";
   line("c-intern", { x: Y, series: [{ name: "Internações", values: A.map(a => a.intern / uI), color: "--s1" }], yf: v => NF(v, 0), tf: v => NF(v, big ? 2 : 1) + (big ? " mi" : " mil"), aria: "Internações por ano" });
   const tx = [{ name: "Bruta", values: A.map(a => a.taxa), color: "--s1" }, { name: "Padronizada por idade", values: A.map(a => a.taxa_pad), color: "--s2" }, ...ref(B.anual.map(a => a.taxa), "Brasil, bruta")];
-  legend("l-taxa", tx); line("c-taxa", { x: Y, series: tx, zero: false, yf: v => NF(v, 0), tf: v => NF(v, 1) });
+  legend("l-taxa", tx); line("c-taxa", { x: Y, series: tx, yf: v => NF(v, 0), tf: v => NF(v, 1) });
   table("t-anual", [
     { h: "Ano", f: a => a.ano }, { h: "AIH", f: a => NF(a.aih) }, { h: "Internações", f: a => NF(a.intern) }, { h: "População", f: a => NF(a.pop) },
     { h: "Taxa/1.000", f: a => NF(a.taxa, 1) }, { h: "Padronizada", f: a => NF(a.taxa_pad, 1) }, { h: "Óbitos", f: a => NF(a.obitos) },
@@ -440,7 +440,7 @@ function render() {
   const win = M.filter(r => r.mes >= "201801" && r.mes <= "202312");
   const eu = [{ name: "Eletivas", values: win.map(r => r.eletivo / mE * 100), color: "--s1" }, { name: "Urgências", values: win.map(r => r.urgencia / mU * 100), color: "--s2" }];
   legend("l-eu", eu);
-  line("c-eu", { x: win.map(r => r.mes), series: eu, zero: false, h: 240, hline: 100, yf: v => NF(v, 0), tf: v => NF(v, 0), xLabel: v => v.slice(0, 4),
+  line("c-eu", { x: win.map(r => r.mes), series: eu, h: 240, hline: 100, yf: v => NF(v, 0), tf: v => NF(v, 0), xLabel: v => v.slice(0, 4),
     xTicks: v => v.endsWith("01"), tipX: v => MES[+v.slice(4) - 1] + "/" + v.slice(0, 4) });
   legend("l-dec", [{ name: "Eletivas", color: "--s1" }, { name: "Urgências", color: "--s2" }]);
   dbars("c-dec", G.dec, { aria: "Variação por subgrupo de procedimento" });
@@ -453,9 +453,9 @@ function render() {
   heat("c-heat", D.faixas, Y, (f, y) => (G.faixa.find(r => r.ano === y && r.faixa === f) || {}).taxa,
     { legend: "l-heat", tip: (f, y, v) => `<b>${f} anos · ${y}</b><div>${NF(v, 1)} por 1.000</div>`, aria: "Taxa por faixa etária e ano" });
   const sx = [{ name: "Mulheres", values: A.map(a => a.taxa_f), color: "--s7" }, { name: "Homens", values: A.map(a => a.taxa_m), color: "--s4" }];
-  legend("l-sexo", sx); line("c-sexo", { x: Y, series: sx, zero: false, yf: v => NF(v, 0), tf: v => NF(v, 1), endLabels: true });
+  legend("l-sexo", sx); line("c-sexo", { x: Y, series: sx, yf: v => NF(v, 0), tf: v => NF(v, 1), endLabels: true });
   const id = [{ name: nome, values: A.map(a => a.idade_med), color: "--s1" }, ...ref(B.anual.map(a => a.idade_med))];
-  legend("l-idade", isUF ? id : []); line("c-idade", { x: Y, series: id, zero: false, yf: v => NF(v, 0), tf: v => NF(v, 0) + " anos" });
+  legend("l-idade", isUF ? id : []); line("c-idade", { x: Y, series: id, yf: v => NF(v, 0), tf: v => NF(v, 0) + " anos" });
 
   const box = document.getElementById("c-caps"); box.innerHTML = "";
   const caps = G.cap.filter(c => c.t1 >= 1);
@@ -465,7 +465,7 @@ function render() {
     box.appendChild(d);
   });
   const Bcap = Object.fromEntries(B.cap.map(c => [c.cap, c]));
-  caps.forEach((c, k) => line(`cap-${k}`, { x: Y, series: [{ name: nome, values: c.serie, color: "--s1" }, ...ref(Bcap[c.cap].serie)], h: 120, zero: false, ticks: 2, ml: 36, yf: v => NF(v, 0), tf: v => NF(v, 1) + " /10 mil", every: 17 }));
+  caps.forEach((c, k) => line(`cap-${k}`, { x: Y, series: [{ name: nome, values: c.serie, color: "--s1" }, ...ref(Bcap[c.cap].serie)], h: 120, ticks: 2, ml: 36, yf: v => NF(v, 0), tf: v => NF(v, 1) + " /10 mil", every: 17 }));
   table("t-cap", [
     { h: "Cap.", f: c => c.cap, cls: "code" }, { h: "Capítulo", f: c => c.nome, cls: "l" },
     { h: "Intern. 2008–09", f: c => NF(c.n0) }, { h: "Intern. 2024–25", f: c => NF(c.n1) },
@@ -482,9 +482,9 @@ function render() {
   ], G.cid_ob);
 
   legend("l-desf", isUF ? [{ name: nome, color: "--s1" }, { name: "Brasil", color: "--ref", ref: true }] : []);
-  line("c-mort", { x: Y, series: [{ name: nome, values: A.map(a => a.mort), color: "--s8" }, ...ref(B.anual.map(a => a.mort))], zero: false, yf: v => NF(v, 1), tf: v => NF(v, 2) + "%", h: 180 });
-  line("c-perm", { x: Y, series: [{ name: nome, values: A.map(a => a.perm), color: "--s1" }, ...ref(B.anual.map(a => a.perm))], zero: false, yf: v => NF(v, 1), tf: v => NF(v, 2) + " dias", h: 180 });
-  line("c-uti", { x: Y, series: [{ name: nome, values: A.map(a => a.uti), color: "--s3" }, ...ref(B.anual.map(a => a.uti))], zero: false, yf: v => NF(v, 1), tf: v => NF(v, 1) + "%", h: 180 });
+  line("c-mort", { x: Y, series: [{ name: nome, values: A.map(a => a.mort), color: "--s8" }, ...ref(B.anual.map(a => a.mort))], yf: v => NF(v, 1), tf: v => NF(v, 2) + "%", h: 180 });
+  line("c-perm", { x: Y, series: [{ name: nome, values: A.map(a => a.perm), color: "--s1" }, ...ref(B.anual.map(a => a.perm))], yf: v => NF(v, 1), tf: v => NF(v, 2) + " dias", h: 180 });
+  line("c-uti", { x: Y, series: [{ name: nome, values: A.map(a => a.uti), color: "--s3" }, ...ref(B.anual.map(a => a.uti))], yf: v => NF(v, 1), tf: v => NF(v, 1) + "%", h: 180 });
   const mf = [2008, 2025].map((y, k) => ({ name: String(y), values: D.faixas.map(f => G.faixa.find(r => r.ano === y && r.faixa === f).mort), color: k ? "--s8" : "--s1" }));
   legend("l-mfx", mf); line("c-mfx", { x: D.faixas, series: mf, yf: v => NF(v, 0), tf: v => NF(v, 2) + "%", tipX: v => v + " anos", every: 1, h: 200 });
 
@@ -497,7 +497,7 @@ function render() {
   const vs = [{ name: "R$ de 2025 (IPCA)", values: A.map(a => a.valor_real * 1e3), color: "--s1" }, { name: "Corrente", values: A.map(a => a.valor_nom * 1e3), color: "--s2", dash: "5 4" }];
   legend("l-val", vs); line("c-val", { x: Y, series: vs, yf: v => NF(v, 0), tf: v => "R$ " + NF(v, 0) + " mi" });
   const md = [{ name: nome, values: A.map(a => a.medio_real), color: "--s1" }, ...ref(B.anual.map(a => a.medio_real))];
-  legend("l-medio", isUF ? md : []); line("c-medio", { x: Y, series: md, zero: false, yf: v => NF(v, 0), tf: v => "R$ " + NF(v, 0) });
+  legend("l-medio", isUF ? md : []); line("c-medio", { x: Y, series: md, yf: v => NF(v, 0), tf: v => "R$ " + NF(v, 0) });
 
   bars("c-uf", D.uf.map(u => ({ label: u.uf, v: u.t1, v0: u.t0, u, color: u.cod === GEO ? "--s2" : "--s1" })), { ml: 34, aria: "Taxa por UF",
     tip: r => `<b>${r.u.nome} · ${r.u.regiao}</b><div class="row"><span>2024–25</span><b>${NF(r.u.t1, 1)}/1.000</b></div><div class="row"><span>2008–09</span><b>${NF(r.u.t0, 1)}/1.000</b></div><div class="row"><span>Variação</span><b>${SG(r.u.var)}</b></div><div class="row"><span>Internados fora da UF</span><b>${NF(r.u.fora, 1)}%</b></div>` });
